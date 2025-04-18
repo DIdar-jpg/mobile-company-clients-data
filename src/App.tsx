@@ -1,4 +1,4 @@
-import ClientsTableWrapper from "./components/ClinetsTable/ClientsTableWrapper";
+import ClientsTableWrapper from "./components/ClientsTable/ClientsTableWrapper";
 import { Header } from "./components/Layout/Header";
 
 const App: React.FC = () => {

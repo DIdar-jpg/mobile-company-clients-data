@@ -1,6 +1,7 @@
 import React from "react";
 import { useMemo } from "react";
-import { useClient, Client} from '@/hooks/useClient'
+import { useClient, Client } from "@/hooks/useClient";
+import useClientMutation from '@/hooks/useClientMutation'
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
@@ -14,12 +15,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 // import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox";
-import { UserRoundPen } from 'lucide-react';
-import { Trash } from 'lucide-react';
+import { UserRoundPen } from "lucide-react";
+import { Trash } from "lucide-react";
 import ClientsTable from "./ClientsTable";
 
 const ClientsTableWrapper: React.FC = () => {
-
+   const { mutate } = useClientMutation()
    const columns = useMemo<ColumnDef<Client>[]>(() => {
       return [
          {
@@ -83,8 +84,6 @@ const ClientsTableWrapper: React.FC = () => {
          {
             id: "actions",
             cell: ({ row }) => {
-               const payment = row.original;
-
                return (
                   <DropdownMenu>
                      <DropdownMenuTrigger asChild>
@@ -94,34 +93,39 @@ const ClientsTableWrapper: React.FC = () => {
                         </Button>
                      </DropdownMenuTrigger>
                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                           className="bg-warning"
-                           onClick={() =>
-                              navigator.clipboard.writeText(payment.id)
-                           }
-                        >
-                           Change <UserRoundPen className="text-popover-foreground"/>
+                        <DropdownMenuItem className="bg-warning">
+                           Change{" "}
+                           <UserRoundPen className="text-popover-foreground" />
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="bg-destructive">
-                           Delete <Trash className="text-popover-foreground"/>
+                        <DropdownMenuItem
+                           className="bg-destructive"
+                           onClick={() => mutate({ method: "delete", url: `${row.original.id}`})}
+                        >
+                           Delete <Trash className="text-popover-foreground" />
                         </DropdownMenuItem>
                      </DropdownMenuContent>
                   </DropdownMenu>
                );
             },
-            header: 'Actions'
+            header: "Actions",
          },
       ];
    }, []);
 
    const { status, data } = useClient();
 
-
    return (
       <div className="py-10">
          {/* data! — это non-null assertion. Ты говоришь TypeScript: "я точно знаю, что это не undefined". */}
-         { status === 'success' && <ClientsTable columns={columns} data={data!} filterPlaceholder="Filter emails..." filterKey="email"/> }
+         {status === "success" && (
+            <ClientsTable
+               columns={columns}
+               data={data!}
+               filterPlaceholder="Filter emails..."
+               filterKey="email"
+            />
+         )}
       </div>
    );
 };
