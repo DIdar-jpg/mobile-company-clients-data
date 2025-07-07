@@ -39,8 +39,9 @@ interface ClientsTableProps<TValue,> {
    data: Client[];
    filterPlaceholder: string,
    filterKey: keyof Client,
+   onRowClick?: (client: Client) => void
 }
-const ClientsTable = <TValue,>({ columns, data, filterPlaceholder, filterKey }: ClientsTableProps<TValue>): React.ReactElement => {
+const ClientsTable = <TValue,>({ columns, data, filterPlaceholder, filterKey, onRowClick }: ClientsTableProps<TValue>): React.ReactElement => {
    // sorting — хранит информацию о сортировке колонок.
    const [sorting, setSorting] = React.useState<SortingState>([]);
    // columnFilters — фильтры (например, по email).
@@ -167,6 +168,8 @@ const ClientsTable = <TValue,>({ columns, data, filterPlaceholder, filterKey }: 
                         <TableRow
                            key={row.id}
                            data-state={row.getIsSelected() && "selected"}
+                           onClick={() => onRowClick?.(row.original)} 
+                           className="cursor-pointer"
                         >
                            {row.getVisibleCells().map((cell) => (
                               <TableCell key={cell.id}>
