@@ -14,12 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 // import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-   Drawer,
-   DrawerContent,
-   DrawerHeader,
-   DrawerTitle,
-} from "@/components/ui/drawer";
+
 import {
    Dialog,
    DialogClose,
@@ -28,7 +23,6 @@ import {
    DialogFooter,
    DialogHeader,
    DialogTitle,
-   DialogTrigger,
 } from "@/components/ui/dialog.tsx";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,16 +31,50 @@ import { Trash } from "lucide-react";
 import { ArrowUpDown } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import ClientsTable from "./ClientsTable";
+import DrawerWrapper from "./DrawerWrapper";
+
+// const formSchema = z.object({
+//    name: z.string().min(1, {
+//        message: "Name can not be less than 1 symbol.",
+//    }),
+//    surname: z.string().min(1, {
+//        message: "Surname can not be less than 1 symbol.",
+//    }),
+//    dateOfBirth: z.string().refine((val) => !isNaN(new Date(val).getTime()), {
+//       message: "Invalid date format.", // Базовая проверка на валидность даты
+//   }).transform((val) => new Date(val)),
+//   sex: z.enum(["male", "female"], {
+//    errorMap: (issue, ctx) => {
+//        if (issue.code === z.ZodIssueCode.invalid_enum_value) {
+//            return { message: "Sex must be only 'male' or 'female'." };
+//        }
+//        return { message: ctx.defaultError };
+//    }}),
+//    email: z.string().email({ message: "Invalid email format." }),
+//    number: z.string().regex(/^\+?[0-9\s\-()]*$/, { message: "Invalid number format." }),
+// });
 
 const ClientsTableWrapper: React.FC = () => {
    const { mutate } = useClientMutation();
    const isMobile = useMediaQuery("(max-width: 1024px)");
    const [selectedClient, setSelectedClient] = useState<Client | null>(null);
    const [drawerOpen, setDrawerOpen] = useState(false);
-   const [dialogOpen, setDialogOpen] = useState(false); 
+   const [dialogOpen, setDialogOpen] = useState(false);
 
    const [editClientName, setEditClientName] = useState("");
    const [editClientUsername, setEditClientUsername] = useState("");
+
+   //    const form = useForm<FormValues>({
+   //       resolver: zodResolver(formSchema),
+   //       defaultValues: {
+   //           name: "",
+   //           surname: "",
+   //           dateOfBirth: "",
+   //           sex: "",
+   //           email: "",
+   //           number: "",
+   //       },
+   //   });
 
    const handleRowClick = (client: Client) => {
       if (isMobile) {
@@ -56,37 +84,49 @@ const ClientsTableWrapper: React.FC = () => {
    };
 
    const openEditDialog = (client: Client) => {
+      if (client) { 
       setSelectedClient(client);
       setEditClientName(client.name); // Инициализация формы данными выбранного клиента
       // setEditClientUsername(client.username); // Если есть поле username в Client
       setDialogOpen(true);
-  };
+      }
+   };
 
-  // Функция для закрытия Dialog и сброса выбранного клиента
-  const closeEditDialog = () => {
+   // Функция для закрытия Dialog и сброса выбранного клиента
+   const closeEditDialog = () => {
       setDialogOpen(false);
       setSelectedClient(null);
       setEditClientName(""); // Сброс полей формы
       setEditClientUsername("");
-  };
+   };
 
-  const handleSaveChanges = () => {
-   if (selectedClient) {
-       // Здесь вы будете отправлять изменения на сервер
-       // Например:
-       mutate({
-           method: "put", // Или "put"
-           url: `${selectedClient.id}`,
-           data: {
+   const handleDelete = (client: Client,  action: (arg: boolean) => void = (_arg: boolean) => { }) => {
+      if (client){
+         mutate({
+            method: "delete",
+            url: `${client.id}`,
+         });
+         action(false)
+      }
+   };
+   const handleSaveChanges = () => {
+      console.log(selectedClient);
+      if (selectedClient) {
+         // Здесь вы будете отправлять изменения на сервер
+         // Например:
+         mutate({
+            method: "put", // Или "put"
+            url: `${selectedClient.id}`,
+            data: {
                ...selectedClient, // Сохраняем все оригинальные данные
                name: editClientName,
                // username: editClientUsername, // Обновляем из полей формы
                // ... другие обновленные поля
-           },
-       });
-       closeEditDialog(); // Закрываем модальное окно после сохранения
-   }
-};
+            },
+         });
+         closeEditDialog(); // Закрываем модальное окно после сохранения
+      }
+   };
 
    const columns = useMemo<ColumnDef<Client>[]>(() => {
       return [
@@ -153,7 +193,6 @@ const ClientsTableWrapper: React.FC = () => {
          {
             id: "actions",
             cell: ({ row }) => {
-
                const client = row.original;
 
                return (
@@ -169,11 +208,9 @@ const ClientsTableWrapper: React.FC = () => {
                         </Button>
                      </DropdownMenuTrigger>
                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem 
-                        className="bg-warning"
-                        onClick={ () => { 
-                           openEditDialog(client); 
-                         }}
+                        <DropdownMenuItem
+                           className="bg-warning"
+                           onSelect={() => { openEditDialog(client) }}
                         >
                            Change
                            <UserRoundPen className="text-popover-foreground" />
@@ -181,12 +218,7 @@ const ClientsTableWrapper: React.FC = () => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                            className="bg-destructive"
-                           onClick={() =>
-                              mutate({
-                                 method: "delete",
-                                 url: `${client.id}`,
-                              })
-                           }
+                           onSelect={() => { handleDelete(client) }}
                         >
                            Delete <Trash className="text-popover-foreground" />
                         </DropdownMenuItem>
@@ -214,94 +246,59 @@ const ClientsTableWrapper: React.FC = () => {
             />
          )}
 
-         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <DrawerContent>
-               <DrawerHeader>
-                  <DrawerTitle className="font-bold">Client Info</DrawerTitle>
-               </DrawerHeader>
-               {selectedClient && (
-                  <div className="p-4 space-y-2">
-                     <p>
-                        <strong>Name:</strong> {selectedClient.name}
-                     </p>
-                     <p>
-                        <strong>Surname:</strong> {selectedClient.surname}
-                     </p>
-                     <p>
-                        <strong>Date of Birth:</strong>{" "}
-                        {selectedClient.dateOfBirth}
-                     </p>
-                     <p>
-                        <strong>Sex:</strong> {selectedClient.sex}
-                     </p>
-                     <p>
-                        <strong>Email:</strong> {selectedClient.email}
-                     </p>
-                     <p>
-                        <strong>Number:</strong> {selectedClient.number}
-                     </p>
-                     <div className="flex justify-between pt-4 border-t">
-                        <strong>Actions</strong>
-                        <div className="flex gap-3">
-                           <Button className="bg-warning text-popover-foreground hover:bg-warning">
-                              Change
-                           </Button>
-                           <Button
-                              variant="destructive"
-                              className="text-popover-foreground hover:bg-destructive"
-                              onClick={() => {
-                                 mutate({
-                                    method: "delete",
-                                    url: `${selectedClient.id}`,
-                                 });
-                                 setDrawerOpen(false);
-                              }}
-                           >
-                              Delete
-                           </Button>
-                        </div>
-                     </div>
-                  </div>
-               )}
-            </DrawerContent>
-         </Drawer>
+         <DrawerWrapper
+            drawerOpen={drawerOpen}
+            setDrawerOpen={setDrawerOpen}
+            selectedClient={selectedClient}
+            openEditDialog={openEditDialog}
+            handleDelete={handleDelete}
+         />
 
          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <form onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }}>
-                    <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                            <DialogTitle>Edit client profile</DialogTitle>
-                            <DialogDescription>
-                                Make changes to the client's profile here. Click save when you're done.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4">
-                            <div className="grid gap-3">
-                                <Label htmlFor="name">Name</Label>
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    value={editClientName}
-                                    onChange={(e) => setEditClientName(e.target.value)}
-                                />
-                            </div>
-                            {/* Пример добавления других полей, например, Surname */}
-                            <div className="grid gap-3">
-                                <Label htmlFor="surname">Surname</Label>
-                                <Input
-                                    id="surname"
-                                    name="surname"
-                                    value={selectedClient?.surname || ""} // Используем optional chaining и пустую строку как fallback
-                                    // Обычно здесь будет отдельное состояние для каждого поля или форма с useForm
-                                    onChange={(e) => {
-                                        if (selectedClient) {
-                                            setSelectedClient({ ...selectedClient, surname: e.target.value });
-                                        }
-                                    }}
-                                />
-                            </div>
-                            {/* Замените эти инпуты на ваши реальные поля Client */}
-                            {/* <div className="grid gap-3">
+            <form
+               onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSaveChanges();
+               }}
+            >
+               <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                     <DialogTitle>Edit client profile</DialogTitle>
+                     <DialogDescription>
+                        Make changes to the client's profile here. Click save
+                        when you're done.
+                     </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4">
+                     <div className="grid gap-3">
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                           id="name"
+                           name="name"
+                           value={editClientName}
+                           onChange={(e) => setEditClientName(e.target.value)}
+                        />
+                     </div>
+                     {/* Пример добавления других полей, например, Surname */}
+                     <div className="grid gap-3">
+                        <Label htmlFor="surname">Surname</Label>
+                        <Input
+                           id="surname"
+                           name="surname"
+                           value={selectedClient?.surname || ""} // Используем optional chaining и пустую строку как fallback
+                           // Обычно здесь будет отдельное состояние для каждого поля или форма с useForm
+                           onChange={(e) => {
+                              if (selectedClient) {
+                                 setSelectedClient({
+                                    ...selectedClient,
+                                    surname: e.target.value,
+                                 });
+                              }
+                           }}
+                        />
+                     </div>
+                     {/* Замените эти инпуты на ваши реальные поля Client */}
+                     {/* <div className="grid gap-3">
                                 <Label htmlFor="username">Username</Label>
                                 <Input
                                     id="username"
@@ -310,15 +307,21 @@ const ClientsTableWrapper: React.FC = () => {
                                     onChange={(e) => setEditClientUsername(e.target.value)}
                                 />
                             </div> */}
-                        </div>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button variant="outline" type="button" onClick={closeEditDialog}>Cancel</Button>
-                            </DialogClose>
-                            <Button type="submit">Save changes</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </form>
+                  </div>
+                  <DialogFooter>
+                     <DialogClose asChild>
+                        <Button
+                           variant="outline"
+                           type="button"
+                           onClick={closeEditDialog}
+                        >
+                           Cancel
+                        </Button>
+                     </DialogClose>
+                     <Button type="submit">Save changes</Button>
+                  </DialogFooter>
+               </DialogContent>
+            </form>
          </Dialog>
       </div>
    );
