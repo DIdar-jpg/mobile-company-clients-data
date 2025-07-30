@@ -1,23 +1,34 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 
 export type Client = {
    id: string,
    name: string,
    surname: string,
-   dateOfBirth: string,
-   sex: string,
+   dateOfBirth: string;
+   sex: "" | "male" | "female"; 
    email: string,
    number: string
 }
 
 export function useClient(): { status: string, data: Client[], error: object | null } {
-   // To subscribe to a query in your components or custom hooks, call the useQuery hook with at least:
-   // A unique key for the query
-   // A function that returns a promise that:
-   // Resolves the data, or
-   // Throws an error
-   // The unique key you provide is used internally for refetching, caching, and sharing your queries throughout your application.
+
+   const formatDate = (res: AxiosResponse) => { 
+      const result = res.data.map((client: Client) => {
+         const options: Intl.DateTimeFormatOptions = {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        };
+        const date = new Date(client.dateOfBirth)
+        return {
+         ...client,
+         dateOfBirth: date.toLocaleDateString('ru-RU', options)
+        }
+      })
+      return result
+   }
+
    const { status, data = [], error } = useQuery<Client[]>({
       queryKey: ["clients"],
       queryFn: function () {
@@ -25,10 +36,10 @@ export function useClient(): { status: string, data: Client[], error: object | n
             method: "get",
             baseURL: "https://67891f1e2c874e66b7d7ac43.mockapi.io",
             url: "clients",
-         }).then((res) => res.data); // нужно возвращать res.data, а не undefined
+         })
+         .then((res) => formatDate(res) )
       },
    });
 
-   // Для примера: можно возвращать data, статус и ошибку
    return { status, data, error };
 }
