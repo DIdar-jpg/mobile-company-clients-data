@@ -14,17 +14,17 @@ export type Client = {
 export function useClient(): { status: string, data: Client[], error: object | null } {
 
    const formatDate = (res: AxiosResponse) => { 
-      const result = res.data.map((client: Client) => {
+         const result = res.data.map((client: Client) => {
          const options: Intl.DateTimeFormatOptions = {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
-        };
-        const date = new Date(client.dateOfBirth)
-        return {
-         ...client,
-         dateOfBirth: date.toLocaleDateString('ru-RU', options)
-        }
+         };
+         const date = new Date(client.dateOfBirth)
+         return {
+            ...client,
+            dateOfBirth: date.toLocaleDateString('ru-RU', options)
+         }
       })
       return result
    }

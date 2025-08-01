@@ -1,5 +1,5 @@
 import React from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useContext } from "react";
 import { useClient, Client } from "@/hooks/useClient";
 import useMediaQuery from "@/hooks/useMediaQuery";
 import useClientMutation from "@/hooks/useClientMutation";
@@ -12,7 +12,6 @@ import {
    DropdownMenuSeparator,
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox";
 
 import { UserRoundPen } from "lucide-react";
@@ -21,16 +20,17 @@ import { ArrowUpDown } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import ClientsTable from "./ClientsTable";
 import DrawerWrapper from "./DrawerWrapper";
-import DialogWrapper from "./DialogWrapper";
+import DialogWrapper from "../DialogWrapper.tsx";
+
+import { DialogContext } from '@/DialogContext.ts';
 
 const ClientsTableWrapper: React.FC = () => {
    const { mutate } = useClientMutation();
    const isMobile = useMediaQuery("(max-width: 1024px)");
-   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
    const [drawerOpen, setDrawerOpen] = useState(false);
-   const [dialogOpen, setDialogOpen] = useState(false);
    const { status, data } = useClient();
 
+   const { setDialogOpen, selectedClient, setSelectedClient } = useContext(DialogContext);
 
    const handleRowClick = (client: Client) => {
       if (isMobile) {
@@ -186,12 +186,7 @@ const ClientsTableWrapper: React.FC = () => {
             />
          )}
 
-         <DialogWrapper
-            dialogOpen={dialogOpen}
-            setDialogOpen={setDialogOpen}
-            setSelectedClient={setSelectedClient}
-            selectedClient={selectedClient}
-         />
+         <DialogWrapper/>
 
          <DrawerWrapper
             drawerOpen={drawerOpen}
