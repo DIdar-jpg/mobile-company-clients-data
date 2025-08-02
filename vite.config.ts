@@ -10,6 +10,7 @@ export default defineConfig({
    },
 
    plugins: [react(), tailwindcss()],
+   base: 'mobile-company-clients-data',
    resolve: {
       alias: {
          "@": path.resolve(__dirname, "./src"),
