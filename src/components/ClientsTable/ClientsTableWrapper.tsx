@@ -12,14 +12,14 @@ import {
    DropdownMenuSeparator,
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
+// import { Checkbox } from "@/components/ui/checkbox";
 
 import { UserRoundPen } from "lucide-react";
 import { Trash } from "lucide-react";
 import { ArrowUpDown } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
 import ClientsTable from "./ClientsTable";
-import DrawerWrapper from "./DrawerWrapper";
+import DrawerWrapper from "../DrawerWrapper.tsx";
 import DialogWrapper from "../DialogWrapper.tsx";
 
 import { DialogContext } from '@/DialogContext.ts';
@@ -61,30 +61,30 @@ const ClientsTableWrapper: React.FC = () => {
    
    const columns = useMemo<ColumnDef<Client>[]>(() => {
       return [
-         {
-            id: "select",
-            header: ({ table }) => (
-               <Checkbox
-                  checked={
-                     table.getIsAllPageRowsSelected() ||
-                     (table.getIsSomePageRowsSelected() && "indeterminate")
-                  }
-                  onCheckedChange={(value) =>
-                     table.toggleAllPageRowsSelected(!!value)
-                  }
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label="Select all"
-               />
-            ),
-            cell: ({ row }) => (
-               <Checkbox
-                  checked={row.getIsSelected()}
-                  onCheckedChange={(value) => row.toggleSelected(!!value)}
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label="Select row"
-               />
-            ),
-         },
+         // {
+         //    id: "select",
+         //    header: ({ table }) => (
+         //       <Checkbox
+         //          checked={
+         //             table.getIsAllPageRowsSelected() ||
+         //             (table.getIsSomePageRowsSelected() && "indeterminate")
+         //          }
+         //          onCheckedChange={(value) =>
+         //             table.toggleAllPageRowsSelected(!!value)
+         //          }
+         //          onClick={(e) => e.stopPropagation()}
+         //          aria-label="Select all"
+         //       />
+         //    ),
+         //    cell: ({ row }) => (
+         //       <Checkbox
+         //          checked={row.getIsSelected()}
+         //          onCheckedChange={(value) => row.toggleSelected(!!value)}
+         //          onClick={(e) => e.stopPropagation()}
+         //          aria-label="Select row"
+         //       />
+         //    ),
+         // },
          {
             accessorKey: "name",
             header: "Name",
