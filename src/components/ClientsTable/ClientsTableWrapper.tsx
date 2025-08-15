@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useMemo, useState, useContext } from "react";
+import { useMemo, useState } from "react";
 
 import { useClient, Client } from "@/hooks/useClient";
 
