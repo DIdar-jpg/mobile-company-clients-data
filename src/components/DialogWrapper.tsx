@@ -1,5 +1,4 @@
-import { useContext } from "react";
-import { DialogContext } from '@/DialogContext.ts';
+import { useDialog } from '@/context/DialogContext';
 
 import {
    Dialog,
@@ -14,7 +13,7 @@ import FormWrapper from './Form/FormWrapper'
 
 const DialogWrapper:React.FC = () => {
 
-   const { dialogOpen, setDialogOpen, selectedClient } = useContext(DialogContext);
+   const { dialogOpen, setDialogOpen, selectedClient } = useDialog();
 
    const dialogText = selectedClient ? 
       {

@@ -1,5 +1,5 @@
-import { useEffect, useContext } from "react";
-import { DialogContext } from '@/DialogContext.ts';
+import { useEffect } from "react";
+import { useDialog } from '@/context/DialogContext';
 
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ const FormWrapper = ({ buttonText }: { buttonText: string}) => {
 
    const { mutate } = useClientMutation();
 
-   const { setDialogOpen, selectedClient, setSelectedClient } = useContext(DialogContext);
+   const { setDialogOpen, selectedClient, setSelectedClient } = useDialog();
 
    const form = useForm<FormInput>({
       resolver: zodResolver(formSchema),
