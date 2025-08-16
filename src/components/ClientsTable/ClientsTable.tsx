@@ -29,6 +29,7 @@ import {
    DropdownMenuTrigger,
  } from "@/components/ui/dropdown-menu"
 import { Button } from '@/components/ui/button'
+import { useTableSelection } from "@/context/TableSelectionContext";
 
  // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -82,6 +83,8 @@ const ClientsTable = <TValue,>({ columns, data, filterPlaceholder, filterKey, on
          rowSelection,
       },
    });
+
+   const { selectedClients } = useTableSelection()
    return (
       <div className="px-2 sm:px-4">
          {/* table.getColumn("email") — достаёт колонку с accessorKey = "email" из таблицы. 
@@ -131,7 +134,7 @@ const ClientsTable = <TValue,>({ columns, data, filterPlaceholder, filterKey, on
                </DropdownMenu>
 
                <div className="text-sm text-muted-foreground">
-                  {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                  {selectedClients.size} of{" "}
                   {table.getFilteredRowModel().rows.length} row(s) selected.
                </div>
             </div>
